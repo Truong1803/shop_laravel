@@ -22,3 +22,8 @@ function removeRow(id, url) {
         })
     }
 }
+
+//Upload file
+$('#upload').change(function(){
+    console.log(123);
+})
