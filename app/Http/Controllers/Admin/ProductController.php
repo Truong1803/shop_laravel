@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\ProductRequest;
-use App\Http\Service\Product\ProductAdminService;
+use App\Http\Service\Product\ProductService;
+use App\Http\Service\Menu\MenuService;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -16,9 +17,9 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     protected $productService;
+    protected $productService;
 
-    public function __construct(ProductAdminService $productService)
+    public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
     }
@@ -38,7 +39,10 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.product.add', [
+            'title' => 'Thêm Sản Phẩm Mới',
+            'menus' => $this->productService->getMenu()
+        ]);
     }
 
     /**
@@ -47,9 +51,11 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        //
+        $this->productService->insert($request);
+
+        return redirect()->back();
     }
 
     /**
@@ -58,9 +64,13 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Product $product) //($id) dùng model với biến cùng tên param trong route sẽ check luôn xem có trong database hay ko
     {
-        //
+        return view('admin.product.edit', [
+            'title' => "Chỉnh sửa product",
+            'product' => $product,
+            'menus' => $this->productService->getMenu()
+        ]);
     }
 
     /**
@@ -81,9 +91,13 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Product $product)
     {
-        //
+        $result = $this->productService->update($request, $product);
+        if($result) {
+            return redirect('admin/products/list');
+        }
+        return redirect()->back();
     }
 
     /**
@@ -92,8 +106,16 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         //
+        $result = $this->productService->delete($request);
+        if($result) {
+            return response()->json([
+                'error' => false,
+                'message' => 'Xoa thanh cong'
+            ]);
+        }
+        return response()->json(['error'=>true]);
     }
 }

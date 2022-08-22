@@ -18,4 +18,8 @@ class Product extends Model
         'price_sale',
         'thumb'
     ];
+
+    public function menu() {
+        return $this->hasOne(Menu::class, 'id', 'menu_id');
+    }
 }
